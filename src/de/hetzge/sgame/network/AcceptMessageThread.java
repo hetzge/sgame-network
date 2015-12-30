@@ -19,8 +19,9 @@ public class AcceptMessageThread extends Thread {
 		boolean running = true;
 		while (running) {
 			try {
-				Object object = tcpObjectSocket.readObject();
-				NetworkModule.dispatcher.dispatch(object, tcpObjectSocket);
+				Object object = this.tcpObjectSocket.readObject();
+				IF_Dispatch dispatcher = NetworkModule.setup.getDispatcher();
+				dispatcher.dispatch(object, this.tcpObjectSocket);
 			} catch (Exception e) {
 				Logger.error(e, "error while read object");
 			}

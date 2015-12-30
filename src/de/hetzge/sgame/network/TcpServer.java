@@ -17,7 +17,7 @@ class TcpServer implements IF_Network {
 
 	public TcpServer start() {
 		try {
-			ServerSocket serverSocket = new ServerSocket(NetworkModule.networkSettings.getPort());
+			ServerSocket serverSocket = new ServerSocket(NetworkModule.settings.getPort());
 			new WaitForClientsThreads(serverSocket).start();
 		} catch (IOException e) {
 			Logger.error(e, "error while starting server socket");
@@ -27,14 +27,14 @@ class TcpServer implements IF_Network {
 
 	@Override
 	public void send(Serializable object) {
-		for (TCPObjectSocket tcpObjectSocket : clients) {
+		for (TCPObjectSocket tcpObjectSocket : this.clients) {
 			NetworkModule.function.send(tcpObjectSocket, object);
 		}
 	}
 
 	@Override
 	public void disconnect() {
-		for (TCPObjectSocket tcpObjectSocket : clients) {
+		for (TCPObjectSocket tcpObjectSocket : this.clients) {
 			try {
 				tcpObjectSocket.close();
 			} catch (IOException e) {
@@ -58,9 +58,10 @@ class TcpServer implements IF_Network {
 			while (running) {
 				try {
 					Logger.info("Wait for client connection ...");
-					Socket socket = serverSocket.accept();
-					TCPObjectSocket tcpObjectSocket = new TCPObjectSocket(socket, NetworkModule.fstConfiguration);
-					clients.add(tcpObjectSocket);
+					Socket socket = this.serverSocket.accept();
+					FSTConfiguration fstConfiguration = NetworkModule.setup.getFstConfiguration();
+					TCPObjectSocket tcpObjectSocket = new TCPObjectSocket(socket, fstConfiguration);
+					TcpServer.this.clients.add(tcpObjectSocket);
 					new AcceptMessageThread(tcpObjectSocket).start();
 					Logger.info("Client connected");
 				} catch (IOException e) {

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.net.Socket;
 
 import org.nustaq.net.TCPObjectSocket;
+import org.nustaq.serialization.FSTConfiguration;
 import org.pmw.tinylog.Logger;
 
 class TcpClient implements IF_Network {
@@ -16,8 +17,9 @@ class TcpClient implements IF_Network {
 			String host = clientSettings.getHost();
 			short port = clientSettings.getPort();
 			Socket socket = new Socket(host, port);
-			tcpObjectSocket = new TCPObjectSocket(socket, NetworkModule.fstConfiguration);
-			new AcceptMessageThread(tcpObjectSocket).start();
+			FSTConfiguration fstConfiguration = NetworkModule.setup.getFstConfiguration();
+			this.tcpObjectSocket = new TCPObjectSocket(socket, fstConfiguration);
+			new AcceptMessageThread(this.tcpObjectSocket).start();
 			Logger.info("Connected as client");
 		} catch (IOException e) {
 			Logger.error(e, "error while connecting to server");
@@ -27,13 +29,13 @@ class TcpClient implements IF_Network {
 
 	@Override
 	public void send(Serializable object) {
-		NetworkModule.function.send(tcpObjectSocket, object);
+		NetworkModule.function.send(this.tcpObjectSocket, object);
 	}
 
 	@Override
 	public void disconnect() {
 		try {
-			tcpObjectSocket.close();
+			this.tcpObjectSocket.close();
 		} catch (IOException e) {
 			Logger.error(e, "error while disconnect");
 		}
